@@ -50,36 +50,37 @@ st.write(df_filtrado)
 
 tm_cliente = df_filtrado['Cliente'].sum()
 
-# Quadrante I
+# Seu código de cálculos (sem alterações)
 df_q1 = df_filtrado[df_filtrado['Quadrante'] == 'Quadrante I']
 df_q1_cliente = df_q1['Cliente'].sum()
 df_q1_interna = df_q1['Interna'].sum()
 df_q1_mec_presente = len(df_q1)
 df_q1_total = df_q1_cliente + df_q1_interna
+df_q1_perdidas = df_q1['Perdidas'].sum()
 df_q1_produtividade = df_q1_total / df_q1_mec_presente if df_q1_mec_presente else 0
 
-# Quadrante II
 df_q2 = df_filtrado[df_filtrado['Quadrante'] == 'Quadrante II']
 df_q2_cliente = df_q2['Cliente'].sum()
 df_q2_interna = df_q2['Interna'].sum()
 df_q2_mec_presente = len(df_q2)
 df_q2_total = df_q2_cliente + df_q2_interna
+df_q2_perdidas = df_q2['Perdidas'].sum()
 df_q2_produtividade = df_q2_total / df_q2_mec_presente if df_q2_mec_presente else 0
 
-# Quadrante III
 df_q3 = df_filtrado[df_filtrado['Quadrante'] == 'Quadrante III']
 df_q3_cliente = df_q3['Cliente'].sum()
 df_q3_interna = df_q3['Interna'].sum()
 df_q3_mec_presente = len(df_q3)
 df_q3_total = df_q3_cliente + df_q3_interna
+df_q3_perdidas = df_q3['Perdidas'].sum()
 df_q3_produtividade = df_q3_total / df_q3_mec_presente if df_q3_mec_presente else 0
 
-# Quadrante IV
 df_q4 = df_filtrado[df_filtrado['Quadrante'] == 'Quadrante IV']
 df_q4_cliente = df_q4['Cliente'].sum()
 df_q4_interna = df_q4['Interna'].sum()
 df_q4_mec_presente = len(df_q4)
 df_q4_total = df_q4_cliente + df_q4_interna
+df_q4_perdidas = df_q4['Perdidas'].sum()
 df_q4_produtividade = df_q4_total / df_q4_mec_presente if df_q4_mec_presente else 0
 
 # Exibe totais
@@ -105,15 +106,100 @@ col11.metric("Quadrante III - Mec Presentes", f"{df_q3_mec_presente}")
 col12.metric("Quadrante IV  - Mec Presentes", f"{df_q4_mec_presente}")
 
 col13, col14, col15, col16 = st.columns(4)
-col13.metric("Quadrante I    - Produtividade", f"{df_q1_produtividade:.2f}")
-col14.metric("Quadrante II   - Produtividade", f"{df_q2_produtividade:.2f}")
-col15.metric("Quadrante III  - Produtividade", f"{df_q3_produtividade:.2f}")
-col16.metric("Quadrante IV   - Produtividade", f"{df_q4_produtividade:.2f}")
+col13.metric("Quadrante I    - Perdidas", f"{df_q1_perdidas}")
+col14.metric("Quadrante II   - Perdidas", f"{df_q2_perdidas}")
+col15.metric("Quadrante III  - Perdidas", f"{df_q3_perdidas}")
+col16.metric("Quadrante IV   - Perdidas", f"{df_q4_perdidas}")
+
+col17, col18, col19, col20 = st.columns(4)
+col17.metric("Quadrante I    - Produtividade", f"{df_q1_produtividade:.2f}")
+col18.metric("Quadrante II   - Produtividade", f"{df_q2_produtividade:.2f}")
+col19.metric("Quadrante III  - Produtividade", f"{df_q3_produtividade:.2f}")
+col20.metric("Quadrante IV   - Produtividade", f"{df_q4_produtividade:.2f}")
 
 # Soma total dos percentuais
 if tm_cliente != 0:
     percentual_oficina = (df_q1_cliente + df_q2_cliente + df_q3_cliente + df_q4_cliente) / tm_cliente * 100
     st.write(f'Soma Percentual - Oficina: {percentual_oficina:.2f}%')
+
+# --- Parte Nova: Determinar os melhores quadrantes ---
+st.markdown("## 🏆 Top Quadrantes")
+
+# Organiza os dados em um dicionário
+dados_quadrantes = {
+    'Quadrante I': {
+        'Cliente': df_q1_cliente,
+        'Interna': df_q1_interna,
+        'Mec_Presentes': df_q1_mec_presente,
+        'Perdidas': df_q1_perdidas,
+        'Produtividade': df_q1_produtividade,
+    },
+    'Quadrante II': {
+        'Cliente': df_q2_cliente,
+        'Interna': df_q2_interna,
+        'Mec_Presentes': df_q2_mec_presente,
+        'Perdidas': df_q2_perdidas,
+        'Produtividade': df_q2_produtividade,
+    },
+    'Quadrante III': {
+        'Cliente': df_q3_cliente,
+        'Interna': df_q3_interna,
+        'Mec_Presentes': df_q3_mec_presente,
+        'Perdidas': df_q3_perdidas,
+        'Produtividade': df_q3_produtividade,
+    },
+    'Quadrante IV': {
+        'Cliente': df_q4_cliente,
+        'Interna': df_q4_interna,
+        'Mec_Presentes': df_q4_mec_presente,
+        'Perdidas': df_q4_perdidas,
+        'Produtividade': df_q4_produtividade,
+    }
+}
+
+# Função para gerar Top 4
+def gerar_top4(dados, chave, ordem_decrescente=True):
+    return sorted(dados.items(), key=lambda x: x[1][chave], reverse=ordem_decrescente)
+
+# Gera Top 4 de cada categoria
+top4_cliente = gerar_top4(dados_quadrantes, 'Cliente')
+top4_interna = gerar_top4(dados_quadrantes, 'Interna')
+top4_mec_presentes = gerar_top4(dados_quadrantes, 'Mec_Presentes')
+top4_perdidas = gerar_top4(dados_quadrantes, 'Perdidas', ordem_decrescente=False)  # Menor é melhor
+top4_produtividade = gerar_top4(dados_quadrantes, 'Produtividade')
+
+# Exibe Top 4
+
+def exibir_top4(nome_categoria, top4):
+    st.write(f"**{nome_categoria}:**")
+    for idx, (quadrante, dados) in enumerate(top4, start=1):
+        st.write(f"{idx}º - {quadrante}: {dados[nome_categoria]}")
+
+# Cliente
+st.write('#### Cliente (Mais manutenções)')
+for i, (quadrante, valores) in enumerate(top4_cliente, start=1):
+    st.write(f"{i}º - {quadrante}: {valores['Cliente']} manutenções")
+
+# Interna
+st.write('#### Interna (Mais manutenções internas)')
+for i, (quadrante, valores) in enumerate(top4_interna, start=1):
+    st.write(f"{i}º - {quadrante}: {valores['Interna']} manutenções")
+
+# Mecânicos Presentes
+st.write('#### Mecânicos Presentes (Maior número)')
+for i, (quadrante, valores) in enumerate(top4_mec_presentes, start=1):
+    st.write(f"{i}º - {quadrante}: {valores['Mec_Presentes']} mecânicos")
+
+# Perdidas
+st.write('#### Perdidas (Menor quantidade de perdas)')
+for i, (quadrante, valores) in enumerate(top4_perdidas, start=1):
+    st.write(f"{i}º - {quadrante}: {valores['Perdidas']} perdas")
+
+# Produtividade
+st.write('#### Produtividade (Maior produtividade)')
+for i, (quadrante, valores) in enumerate(top4_produtividade, start=1):
+    st.write(f"{i}º - {quadrante}: {valores['Produtividade']:.2f} produtividade")
+
 
 # 🔍 Análises detalhadas por mecânico
 st.markdown("## 🔍 Análise por Mecânico")
@@ -159,17 +245,49 @@ qtd_menos_interna = mecanicos_df.loc[menos_interna, 'Interna']
 menos_perda_geral = mecanicos_df['Perdidas'].idxmin()
 qtd_menos_perda_geral = mecanicos_df.loc[menos_perda_geral, 'Perdidas']
 
-# Exibição dos resultados com o nome do líder
-st.markdown("### 📊 Destaques dos Mecânicos")
+st.markdown("### 👑 Top 5 - Mais Moto Cliente")
+top5_cliente = mecanicos_df['Cliente'].sort_values(ascending=False).head(5)
+for mec, qtd in top5_cliente.items():
+    st.write(f"- {mec}: {qtd} motos (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
 
-st.write(f"👑 Mecânico que mais fez **Moto Cliente**: `{top_cliente}` ({qtd_cliente}) - Líder: `{mec_lider_dict.get(top_cliente, 'N/A')}`")
-st.write(f"👶 Mecânico que menos fez **Cliente**: `{menos_cliente}` ({qtd_menos_cliente}) - Líder: `{mec_lider_dict.get(menos_cliente, 'N/A')}`")
-st.write('\n')
-st.write(f"🔧 Mecânico que mais fez **Interna**: `{top_interna}` ({qtd_interna}) - Líder: `{mec_lider_dict.get(top_interna, 'N/A')}`")
-st.write(f"🔧 Mecânico que menos fez **Interna**: `{menos_interna}` ({qtd_menos_interna}) - Líder: `{mec_lider_dict.get(menos_interna, 'N/A')}`")
-st.write('\n')
-st.write(f"🏆 Mecânico que mais fez **Geral**: `{top_geral}` ({qtd_geral}) - Líder: `{mec_lider_dict.get(top_geral, 'N/A')}`")
-st.write(f"🫥 Mecânico que menos fez **Geral**: `{menos_geral}` ({qtd_menos_geral}) - Líder: `{mec_lider_dict.get(menos_geral, 'N/A')}`")
-st.write('\n')
-st.write(f"❌ Mecânico que mais **perdeu motos**: `{top_Perdidas}` ({qtd_perdida}) - Líder: `{mec_lider_dict.get(top_Perdidas, 'N/A')}`")
-st.write(f"✅ Mecânico que menos **perdeu motos** (incluindo zero): `{menos_perda_geral}` ({qtd_menos_perda_geral}) - Líder: `{mec_lider_dict.get(menos_perda_geral, 'N/A')}`")
+# 📉 Exibição dos Bottom 5 - Cliente
+st.markdown("### 👶 Top 5 - Menos Moto Cliente")
+bottom5_cliente = mecanicos_df['Cliente'].sort_values(ascending=True).head(5)
+for mec, qtd in bottom5_cliente.items():
+    st.write(f"- {mec}: {qtd} motos (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
+
+# 🔧 Exibição dos Top 5 - Interna
+st.markdown("### 🔧 Top 5 - Mais Interna")
+top5_interna = mecanicos_df['Interna'].sort_values(ascending=False).head(5)
+for mec, qtd in top5_interna.items():
+    st.write(f"- {mec}: {qtd} internas (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
+
+# 🔧 Exibição dos Bottom 5 - Interna
+st.markdown("### 🔧 Top 5 - Menos Interna")
+bottom5_interna = mecanicos_df['Interna'].sort_values(ascending=True).head(5)
+for mec, qtd in bottom5_interna.items():
+    st.write(f"- {mec}: {qtd} internas (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
+
+# 🏆 Exibição dos Top 5 - Geral
+st.markdown("### 🏆 Top 5 - Mais Geral (Cliente + Interna)")
+top5_geral = mecanicos_df['Total'].sort_values(ascending=False).head(5)
+for mec, qtd in top5_geral.items():
+    st.write(f"- {mec}: {qtd} total (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
+
+# 🫥 Exibição dos Bottom 5 - Geral
+st.markdown("### 🫥 Top 5 - Menos Geral (Cliente + Interna)")
+bottom5_geral = mecanicos_df['Total'].sort_values(ascending=True).head(5)
+for mec, qtd in bottom5_geral.items():
+    st.write(f"- {mec}: {qtd} total (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
+
+# ❌ Exibição dos Top 5 - Perdas
+st.markdown("### ❌ Top 5 - Mais Perdas")
+top5_perdas = mecanicos_df[mecanicos_df['Perdidas'] > 0]['Perdidas'].sort_values(ascending=False).head(5)
+for mec, qtd in top5_perdas.items():
+    st.write(f"- {mec}: {qtd} perdas (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
+
+# ✅ Exibição dos Bottom 5 - Menos Perdas (maiores que zero)
+st.markdown("### ✅ Top 5 - Menos Perdas (acima de 0)")
+bottom5_perdas = mecanicos_df[mecanicos_df['Perdidas'] > 0]['Perdidas'].sort_values(ascending=True).head(5)
+for mec, qtd in bottom5_perdas.items():
+    st.write(f"- {mec}: {qtd} perdas (Líder: `{mec_lider_dict.get(mec, 'N/A')}`)")
